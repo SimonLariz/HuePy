@@ -1,6 +1,14 @@
+import sys
+import os
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(project_root)
+
 import tkinter as tk
 from tkinter import ttk
 import sv_ttk
+
+from color_spaces.hsv import HSV_COLOR
 
 
 class Tooltip:
@@ -107,6 +115,8 @@ class MainWindow(tk.Frame):
         # Call appropriate function to create sliders
         if color_space == "RGB":
             self.create_rgb_sliders()
+        elif color_space == "HSV":
+            self.create_hsv_sliders()
         # Add more elif blocks for other color spaces
 
     def create_rgb_sliders(self):
@@ -118,6 +128,20 @@ class MainWindow(tk.Frame):
             ("R", self.r_val, 0, 255),
             ("G", self.g_val, 0, 255),
             ("B", self.b_val, 0, 255),
+        ]
+
+        for label, var, min_val, max_val in sliders:
+            self.create_slider(label, var, min_val, max_val)
+
+    def create_hsv_sliders(self):
+        self.h_val = tk.IntVar()
+        self.s_val = tk.IntVar()
+        self.v_val = tk.IntVar()
+
+        sliders = [
+            ("H", self.h_val, 0, 360),
+            ("S", self.s_val, 0, 100),
+            ("V", self.v_val, 0, 100),
         ]
 
         for label, var, min_val, max_val in sliders:
@@ -154,6 +178,11 @@ class MainWindow(tk.Frame):
             g = self.g_val.get()
             b = self.b_val.get()
             color = f"#{r:02x}{g:02x}{b:02x}"
+        elif self.color_space_var.get() == "HSV":
+            h = self.h_val.get()
+            s = self.s_val.get()
+            v = self.v_val.get()
+            color = HSV_COLOR(h, s, v)
         else:
             color = "gray"
         self.color_preview.config(bg=color)
@@ -171,6 +200,8 @@ class MainWindow(tk.Frame):
 
     def on_color_space_change(self, event):
         new_color_space = self.color_space_var.get()
+        print("Color space changed to:", new_color_space)
+        self.create_sliders(new_color_space)
 
     def on_window_resize(self, event):
         # Update sliders without recreating them
